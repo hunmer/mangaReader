@@ -40,6 +40,7 @@
     <div class="progress h-25 m-auto">
         <div class="progress-bar w-three-quarter progress-bar-animated rounded-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0% !important;">0%</div>
     </div>
+    <h1 class="pt-10 text-center">1/2</h1>
 </div>
 <div id='content' style="display: none;">
 </div>
@@ -75,13 +76,17 @@ $(function() {
             if(b_inited) return;
             queryed.push($.getJSON('./api?id=' + _GET['id'] + '&sid=' + _GET['sid'] + '&pwd=' + _GET['pwd'] + (i == 0 ? '' : '&progress=1'), function(json, textStatus) {
                 if (textStatus == 'success') {
-                    $('.progress-bar').attr('aria-valuenow', json['progress']).html(json['progress'] + '%')[0].style.cssText = 'width: ' + json['progress'] + '% !important';
+                    setProgress(json['progress']);
                     if (json['progress'] == 100) {
                         clearInterval(timer);
                         for(var http of queryed) http.abort();
 
+                        $('#loading h1').html('2/2');
                         var url = './download/' + _GET['id'] + '/' + _GET['sid'] + '.zip';
-                        const cblob = new zip.HttpReader(url, { useXHR: true });
+                        const cblob = new zip.HttpReader(url, {
+                            preventHeadRequest: true, 
+                            useXHR: true,
+                        });
                         const czip = new zip.ZipReader(cblob, {
                             filenameEncoding: 'utf-8'
                         });
@@ -156,6 +161,10 @@ $(function() {
 
     }
 });
+
+function setProgress(value){
+    $('.progress-bar').attr('aria-valuenow', value).html(value + '%')[0].style.cssText = 'width: ' + value + '% !important';
+}
 
 function scrollTo(y, ms = 600) {
     $("html, body").stop(true, true).animate({
