@@ -1,0 +1,126 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
+<!-- 强制移动设备以app模式打开页面(即在移动设备下全屏，仅支持部分浏览器) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="full-screen" content="yes">
+<!--UC强制全屏-->
+<meta name="browsermode" content="application">
+<!--UC应用模式-->
+<meta name="x5-fullscreen" content="true">
+<!--QQ强制全屏-->
+<meta name="x5-page-mode" content="app">
+<!--QQ应用模式-->
+<link rel="shortcut icon" href="favicon.svg">
+<title></title>
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="css/halfmoon.min.css">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap" rel="stylesheet">
+
+<body style="font-family: 'Noto Sans JP', sans-serif;">
+		<div style="padding-top: 50%;
+    height: 100%;
+    width: 80%;
+    margin: 0 auto;text-align: center;" id='loading'><h1>Loading...</h1>
+</div>
+    <div class="container-fluid mt-20" style="display: none;">
+        <!-- Card with no padding with multiple content containers nested inside of it -->
+        <div class="w-80% mw-full m-auto">
+            <!-- w-600 = width: 60rem (600px), mw-full = max-width: 100% -->
+            <div class="card p-0">
+                <!-- p-0 = padding: 0 -->
+                <div style="width: 100%;" class="m-auto text-center">
+                    <img src="1.png" class="img-fluid rounded-top mt-10" style="width: 30%;" alt="...">
+                </div>
+                <div class="content">
+                    <h2 class="content-title" id='title'>
+                    </h2>
+                    <div>
+                        <span class="text-muted">
+                            <i id='date' class="fa fa-clock-o" aria-hidden="true"></i></span>
+                    </div>
+                    <div class='mt-10'>
+                        <span class="badge">
+                            <i id='author' class="fa fa-user-circle text-primary mr-5" aria-hidden="true"></i>
+                        </span>
+                        <!--  <span class="badge ml-5">
+                            <i class="fa fa-heart text-danger mr-5" aria-hidden="true"></i> 124 likes
+                        </span> -->
+                    </div>
+                </div>
+                <hr />
+                <div class="content">
+                    <h2 class="content-title">
+                        紹介
+                    </h2>
+                    <p id='desc'>
+                    </p>
+                </div>
+                <div class="content" id='list'>
+                    <h2 class="content-title">
+                        巻を選んで読む
+                    </h2>
+                    <!-- <div>
+                        <strong>John Doe</strong>
+                        <br />
+                        Amazing picture! Great job!
+                    </div>
+                    <hr /> -->
+                    <!-- <div class="text-center mt-20">
+                        <button class="btn btn-sm">Load more</button>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="js/halfmoon.min.js"></script>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript">
+_GET = getGETArray();
+
+function getGETArray() {
+    var a_result = [],
+        a_exp;
+    var a_params = window.location.search.slice(1).split('&');
+    for (var k in a_params) {
+        a_exp = a_params[k].split('=');
+        if (a_exp.length > 1) {
+            a_result[a_exp[0]] = decodeURIComponent(a_exp[1]);
+        }
+    }
+    return a_result;
+}
+
+
+if (_GET['id']) {
+    var data = $.getJSON('./api?id=' + _GET['id'], function(json, textStatus) {
+        if (textStatus == 'success') {
+            parseData(json);
+        }
+    });
+}
+
+function parseData(data) {
+		document.title = data['name'];
+    $('#title').html(data['name']);
+    $('img').attr('src', data['cover']);
+    $('#list h2').html('List(' + data['list'].length + ')');
+    $('#date').html('<b class="ml-5">' + new Date(data['date']).toUTCString() + '</b>');
+    $('#author').html(data['author']);
+    $('#desc').html(data['desc']);
+    for (var cap of data['list']) {
+        $('#list').append(` <div>
+            <a target="_blank" href="index.html?id=` + data['id'] + `&sid=` + cap['sid'] + `&pwd=` + data['attr']['password'] + `">` + cap['name'] + `</a>
+            <br/>
+            ` + cap['date'] + `
+        </div>
+        <hr/>`);
+    }
+    $('#loading').fadeOut('slow');
+    $('.container-fluid').fadeIn('slow');
+}
+</script>

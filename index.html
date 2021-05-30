@@ -1,0 +1,202 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
+<!-- 强制移动设备以app模式打开页面(即在移动设备下全屏，仅支持部分浏览器) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="full-screen" content="yes">
+<!--UC强制全屏-->
+<meta name="browsermode" content="application">
+<!--UC应用模式-->
+<meta name="x5-fullscreen" content="true">
+<!--QQ强制全屏-->
+<meta name="x5-page-mode" content="app">
+<!--QQ应用模式-->
+<link rel="shortcut icon" href="favicon.svg">
+<title></title>
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="css/halfmoon.min.css">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap" rel="stylesheet">
+<style type="text/css">
+#content {
+    padding: 10px;
+}
+
+#content img {
+    width: 100%;
+    margin-bottom: 20px;
+    margin: 0 auto;
+    display: block;
+    max-width: 700px;
+}
+</style>
+<div class="sticky-alerts"></div>
+<div style="padding-top: 50%;
+    height: 100%;
+    width: 80%;
+    margin: 0 auto;" id="loading">
+    <div class="progress h-25 m-auto">
+        <div class="progress-bar w-three-quarter progress-bar-animated rounded-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0% !important;">0%</div>
+    </div>
+</div>
+<div id='content' style="display: none;">
+</div>
+<script type="text/javascript" src="js/halfmoon.min.js"></script>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script src="jquery-ajax-blob-arraybuffer.js"></script>
+<script type="text/javascript" src="zip.min.js"></script>
+<script type="text/javascript">
+var _GET = getGETArray();
+var g_cache = {
+    index: 0,
+}
+var b_inited = false;
+$(function() {
+    if (_GET['id'] && _GET['sid'] && _GET['pwd']) {
+        /*window.addEventListener('scroll', (e) => {
+            var dom = $(document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2));
+            var index = dom.attr('data-index');
+            if (dom.length && dom[0].nodeName == 'IMG' && index != g_cache.index) {
+                g_cache.index = index;
+                g_config.history[_GET['id']].index = index;
+                local_saveJson('config', g_config);
+            }
+        });*/
+
+        var i = 0;
+        halfmoon.initStickyAlert({
+            content: '',
+            title: 'loading...'
+        });
+        var queryed = [];
+        var timer = setInterval(() => {
+            if(b_inited) return;
+            queryed.push($.getJSON('./api?id=' + _GET['id'] + '&sid=' + _GET['sid'] + '&pwd=' + _GET['pwd'] + (i == 0 ? '' : '&progress=1'), function(json, textStatus) {
+                if (textStatus == 'success') {
+                    $('.progress-bar').attr('aria-valuenow', json['progress']).html(json['progress'] + '%')[0].style.cssText = 'width: ' + json['progress'] + '% !important';
+                    if (json['progress'] == 100) {
+                        clearInterval(timer);
+                        for(var http of queryed) http.abort();
+
+                        var url = './download/' + _GET['id'] + '/' + _GET['sid'] + '.zip';
+                        const cblob = new zip.HttpReader(url, { useXHR: true });
+                        const czip = new zip.ZipReader(cblob, {
+                            filenameEncoding: 'utf-8'
+                        });
+                        var imgs = [];
+                        czip.getEntries().then(function(entries) {
+                            entries.forEach(function(entry, key) {
+                                // 异步操作所以顺序会乱掉
+                                entry.getData(new zip.BlobWriter(), {
+                                    password: _GET['pwd'],
+                                    //onprogress: (index, max) => {},
+                                }).
+                                then(function(data) {
+                                    entries.every(function(entry) {
+                                        if (entry.added == undefined && entry.uncompressedSize == data.size) {
+                                            entry.added = true;
+                                            imgs.push({
+                                                file: entry.filename,
+                                                img: `<img data-index="` + entry.filename + `" src="` + URL.createObjectURL(data) + `">`
+                                            });
+                                            return false;
+                                        }
+                                        return true;
+                                    });
+                                    if (imgs.length == entries.length) {
+                                        b_inited = true;
+                                        imgs = imgs.sort(function(a, b) {
+                                            return a.file < b.file ? -1 : 1;
+                                        });
+                                        var html = '';
+                                        for (var img of imgs) {
+                                            html += img.img;
+                                        }
+                                         $('#loading').fadeOut('slow');
+                                        $('#content').html(html).show('slow');
+
+                                        halfmoon.initStickyAlert({
+                                            content: 'load ' + imgs.length + ' images.',
+                                            title: 'loaded success'
+                                        });
+
+                                        /*var index;
+                                        if (g_config.history[_GET['id']] != undefined) {
+                                            var d = g_config.history[_GET['id']];
+                                            index = d['index'];
+                                            var img = $('img[data-index="' + index + '"]');
+                                            if (img.length) {
+                                                scrollTo(img.offset().top);
+                                            }
+                                            delete g_config.history[_GET['id']];
+                                        }
+                                        g_config.history[_GET['id']] = {
+                                            date: parseInt(new Date().getTime() / 1000),
+                                            id: _GET['id'],
+                                            sid: _GET['sid'],
+                                            pwd: _GET['pwd'],
+                                            index: index,
+                                        };
+                                        local_saveJson('config', g_config);
+                                        */
+
+                                    }
+                                });
+                            });
+                            return;
+                        });
+
+                    }
+                }
+            }));
+            i++;
+        }, 500);
+
+    }
+});
+
+function scrollTo(y, ms = 600) {
+    $("html, body").stop(true, true).animate({
+        scrollTop: y + 'px',
+    }, ms);
+}
+
+var g_localKey = 'manga_';
+// 本地储存前缀
+var g_config = local_readJson('config', {
+    index: -1,
+    history: {},
+});
+
+function getGETArray() {
+    var a_result = [],
+        a_exp;
+    var a_params = window.location.search.slice(1).split('&');
+    for (var k in a_params) {
+        a_exp = a_params[k].split('=');
+        if (a_exp.length > 1) {
+            a_result[a_exp[0]] = decodeURIComponent(a_exp[1]);
+        }
+    }
+    return a_result;
+}
+
+function local_saveJson(key, data) {
+    if (window.localStorage) {
+        key = g_localKey + key;
+        data = JSON.stringify(data);
+        if (data == undefined) data = '[]';
+        return localStorage.setItem(key, data);
+    }
+    return false;
+}
+
+function local_readJson(key, defaul = '') {
+    if (!window.localStorage) return defaul;
+    key = g_localKey + key;
+    var r = JSON.parse(localStorage.getItem(key));
+    return r === null ? defaul : r;
+}
+</script>

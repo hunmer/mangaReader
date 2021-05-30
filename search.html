@@ -1,0 +1,67 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="full-screen" content="yes">
+<meta name="browsermode" content="application">
+<meta name="x5-fullscreen" content="true">
+<meta name="x5-page-mode" content="app">
+<link rel="shortcut icon" href="favicon.svg">
+<title>Search</title>
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="css/halfmoon.min.css">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap" rel="stylesheet">
+
+<body style="font-family: 'Noto Sans JP', sans-serif;overflow: hidden;">
+		<!-- <div style="padding-top: 50%;
+    height: 100%;
+    width: 80%;
+    margin: 0 auto;text-align: center;" id='loading'><h1>Loading...</h1>
+</div> -->
+    <div class="container-fluid mt-20" style="padding-top: 30%;
+    height: 100%;
+    width: 80%;
+    margin: 0 auto;text-align: center;">
+    <img src="logo.png" class="mb-20">
+        <input id='input_search' type="text" class="form-control form-control-lg w-80%" placeholder="eg: https://dokuha.jp/comicweb/contents/comic/bokugakimowokaeru" onkeydown="if(event.keyCode == 13){search();}">
+        </br>
+        <button class="btn btn-primary btn-lg" type="button" onclick="search()";>Search</button>
+    </div>
+</body>
+<script type="text/javascript" src="js/halfmoon.min.js"></script>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript">
+_GET = getGETArray();
+
+function getGETArray() {
+    var a_result = [],
+        a_exp;
+    var a_params = window.location.search.slice(1).split('&');
+    for (var k in a_params) {
+        a_exp = a_params[k].split('=');
+        if (a_exp.length > 1) {
+            a_result[a_exp[0]] = decodeURIComponent(a_exp[1]);
+        }
+    }
+    return a_result;
+}
+
+function search(s){
+    if(!s) s = $('#input_search').val();
+    $('button').prop('disabled', true).html('searching...');
+    var data = $.getJSON('./api?s=' + s, function(json, textStatus) {
+        if (textStatus == 'success') {
+            window.location.href = './detail.html?id='+json.id;
+        }
+    });
+}
+
+if (_GET['s']) {
+    $('#input_search').val(_GET['s']);
+    serach(_GET['s']);
+}
+
+</script>
