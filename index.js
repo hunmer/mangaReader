@@ -25,6 +25,8 @@ const mimeType = {
  //res.writeHead(301, {'Location': './index.html?id='+id});
  //res.end();
 http.createServer(function(req, res) {
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     const parsedUrl = url.parse(req.url);
     //console.log(parsedUrl);
     if (parsedUrl.pathname == '/api') {
@@ -93,8 +95,7 @@ http.createServer(function(req, res) {
                 const ext = path.parse(pathname).ext;
                 // 根据后缀名获取响应的content-type; 这里的minType定义见上面的代码块  
                 res.setHeader('Content-type', mimeType[ext] || 'text/plain');
-                res.setHeader("Access-Control-Allow-Origin", "*");
-                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                
                 //通过end方法来结束response  
                 res.end(data);
             }
