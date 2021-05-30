@@ -81,7 +81,7 @@
 <script type="text/javascript" src="jquery.min.js"></script>
 <script type="text/javascript">
 _GET = getGETArray();
-
+var api = 'https://mangareader.glitch.me/.';
 function getGETArray() {
     var a_result = [],
         a_exp;
@@ -97,7 +97,7 @@ function getGETArray() {
 
 
 if (_GET['id']) {
-    var data = $.getJSON('./api?id=' + _GET['id'], function(json, textStatus) {
+    var data = $.getJSON(api+'/api?id=' + _GET['id'], function(json, textStatus) {
         if (textStatus == 'success') {
             parseData(json);
         }

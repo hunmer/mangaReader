@@ -49,6 +49,7 @@
 <script src="jquery-ajax-blob-arraybuffer.js"></script>
 <script type="text/javascript" src="zip.min.js"></script>
 <script type="text/javascript">
+var api = 'https://mangareader.glitch.me/.';
 var _GET = getGETArray();
 var g_cache = {
     index: 0,
@@ -74,7 +75,7 @@ $(function() {
         var queryed = [];
         var timer = setInterval(() => {
             if(b_inited) return;
-            queryed.push($.getJSON('./api?id=' + _GET['id'] + '&sid=' + _GET['sid'] + '&pwd=' + _GET['pwd'] + (i == 0 ? '' : '&progress=1'), function(json, textStatus) {
+            queryed.push($.getJSON(api+'/api?id=' + _GET['id'] + '&sid=' + _GET['sid'] + '&pwd=' + _GET['pwd'] + (i == 0 ? '' : '&progress=1'), function(json, textStatus) {
                 if (textStatus == 'success') {
                     setProgress(json['progress']);
                     if (json['progress'] == 100) {
@@ -82,7 +83,7 @@ $(function() {
                         for(var http of queryed) http.abort();
 
                         $('#loading h1').html('2/2');
-                        var url = './download/' + _GET['id'] + '/' + _GET['sid'] + '.zip';
+                        var url = api+'/download/' + _GET['id'] + '/' + _GET['sid'] + '.zip';
                         const cblob = new zip.HttpReader(url, {
                             preventHeadRequest: true, 
                             useXHR: true,

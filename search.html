@@ -35,7 +35,7 @@
 <script type="text/javascript" src="jquery.min.js"></script>
 <script type="text/javascript">
 _GET = getGETArray();
-
+var api = 'https://mangareader.glitch.me/.';
 function getGETArray() {
     var a_result = [],
         a_exp;
@@ -52,7 +52,7 @@ function getGETArray() {
 function search(s){
     if(!s) s = $('#input_search').val();
     $('button').prop('disabled', true).html('searching...');
-    var data = $.getJSON('./api?s=' + s, function(json, textStatus) {
+    var data = $.getJSON(api+'/api?s=' + s, function(json, textStatus) {
         if (textStatus == 'success') {
             window.location.href = './detail.html?id='+json.id;
         }
