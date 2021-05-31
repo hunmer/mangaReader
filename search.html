@@ -31,23 +31,10 @@
         <button class="btn btn-primary btn-lg" type="button" onclick="search()";>Search</button>
     </div>
 </body>
+<script type="text/javascript" src="js/until.js"></script>
 <script type="text/javascript" src="js/halfmoon.min.js"></script>
-<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript">
-_GET = getGETArray();
-var api = 'https://mangareader.glitch.me/.';
-function getGETArray() {
-    var a_result = [],
-        a_exp;
-    var a_params = window.location.search.slice(1).split('&');
-    for (var k in a_params) {
-        a_exp = a_params[k].split('=');
-        if (a_exp.length > 1) {
-            a_result[a_exp[0]] = decodeURIComponent(a_exp[1]);
-        }
-    }
-    return a_result;
-}
 
 function search(s){
     if(!s) s = $('#input_search').val();

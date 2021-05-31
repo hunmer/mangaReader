@@ -46,12 +46,13 @@ http.createServer(function(req, res) {
             if (args['sid']) {
             	if (args['pwd']) {
                     if (args['progress']) { // 进度条请求
-		                	if( downloading[args['id'] + '-' + args['sid']] != undefined){
 		                		 res.writeHead(200, { 'Content-Type': 'application/json' });
-		                    return res.end(JSON.stringify({ progress: downloading[args['id'] + '-' + args['sid']] }));
-		                	}
+		                    return res.end(JSON.stringify({ progress: downloading[args['id'] + '-' + args['sid']] != undefined ? downloading[args['id'] + '-' + args['sid']] : 0 }));
 		                }else{
-	                  	getDownloadLink(args['id'], args['sid'], args['pwd']); // 首次请求
+	                  	getDownloadLink(args['id'], args['sid'], args['pwd']).then(function(){
+	                  		res.writeHead(200, { 'Content-Type': 'application/json' });
+		                    return res.end(JSON.stringify({ progress: 0 }));
+	                  	}); // 首次请求
 		                }
                 }
                 return;
@@ -67,41 +68,28 @@ http.createServer(function(req, res) {
         }
         return;
     }
-
-    // 提取路径  
     const sPath = path.normalize(parsedUrl.pathname).replace(/^(\.\.[\/\\])+/, '');
     let pathname = path.join(__dirname, sPath);
-    //判断路径是否存在  
     fs.exists(pathname, function(exist) {
         if (!exist) {
-            //如果路径不存在，则返回404  
             res.statusCode = 404;
             res.end(`File ${pathname} not found!`);
             return;
         }
-
-        // 如果路径是目录，则将路径替换为目录下的 index.html  
         if (fs.statSync(pathname).isDirectory()) {
             pathname += '/index.html';
         }
-
-        // 根据路径读取文件，此处调用fs模块方法  
         fs.readFile(pathname, function(err, data) {
             if (err) {
                 res.statusCode = 500;
                 res.end(`Error getting the file: ${err}.`);
             } else {
-                // 获取路径后缀名  
                 const ext = path.parse(pathname).ext;
-                // 根据后缀名获取响应的content-type; 这里的minType定义见上面的代码块  
                 res.setHeader('Content-type', mimeType[ext] || 'text/plain');
-                
-                //通过end方法来结束response  
                 res.end(data);
             }
         });
     });
-    //提供http端口监听  
 }).listen(8080);
 
 console.log('Server running at http://127.0.0.1:8080/');
@@ -134,17 +122,6 @@ function searchId(s){
     });
     return promise;
 }
-function getString(str, s, e){
-        var i_start = str.indexOf(s);
-        if(i_start != -1){
-            i_start += s.length;
-            var i_end = str.indexOf(e, i_start);
-            if(i_end != -1){
-                return str.substr(i_start, i_end - i_start);
-            }
-        }
-        return '';
-    }
 
     // getMangaDetail(5097);
 function getMangaDetail(id) {
@@ -205,7 +182,7 @@ function downloadFile(req, targetPath) {
       	var pos = parseInt(received_bytes / total_bytes * 100);
       	if(downloading[key] != pos){
           downloading[key] = pos;
-      		console.log(downloading[key]);
+          if(pos % 10 == 0) console.log('[downloading] ' + key + ' -> ' + downloading[key]);
       	}
       });
       req.on('error', function(err){
@@ -232,6 +209,7 @@ function getDownloadLink(id, sid, pwd) {
                 req.attr_id = id;
                 req.attr_sid = sid;
                 downloadFile(req, file);
+                resolve({ file: file, pwd: pwd });
             }
         }
     });
@@ -263,3 +241,15 @@ function getGETArray(href) {
     }
     return a_result;
 }
+
+function getString(str, s, e){
+        var i_start = str.indexOf(s);
+        if(i_start != -1){
+            i_start += s.length;
+            var i_end = str.indexOf(e, i_start);
+            if(i_end != -1){
+                return str.substr(i_start, i_end - i_start);
+            }
+        }
+        return '';
+    }

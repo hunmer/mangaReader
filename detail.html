@@ -46,13 +46,17 @@
                         <span class="badge">
                             <i id='author' class="fa fa-user-circle text-primary mr-5" aria-hidden="true"></i>
                         </span>
+                        <br/>
+                        <div class="mt-10 mb-10" style="width: 100%;display: block;text-align: right;">
+                            <button id='btn_last' class='btn btn-primary btn-lg' onclick="openLast();">続きをみる</button>
+                        </div>
                         <!--  <span class="badge ml-5">
                             <i class="fa fa-heart text-danger mr-5" aria-hidden="true"></i> 124 likes
                         </span> -->
                     </div>
                 </div>
                 <hr />
-                <div class="content">
+                <div class="content mt-20">
                     <h2 class="content-title">
                         紹介
                     </h2>
@@ -77,24 +81,10 @@
         </div>
     </div>
 </body>
+<script type="text/javascript" src="js/until.js"></script>
 <script type="text/javascript" src="js/halfmoon.min.js"></script>
-<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript">
-_GET = getGETArray();
-var api = 'https://mangareader.glitch.me/.';
-function getGETArray() {
-    var a_result = [],
-        a_exp;
-    var a_params = window.location.search.slice(1).split('&');
-    for (var k in a_params) {
-        a_exp = a_params[k].split('=');
-        if (a_exp.length > 1) {
-            a_result[a_exp[0]] = decodeURIComponent(a_exp[1]);
-        }
-    }
-    return a_result;
-}
-
 
 if (_GET['id']) {
     var data = $.getJSON(api+'/api?id=' + _GET['id'], function(json, textStatus) {
@@ -104,17 +94,32 @@ if (_GET['id']) {
     });
 }
 
+function openLast(){
+    initConfig();
+    if(g_config.history[_GET['id']] != undefined){
+        window.open(`./index.html?id=` + _GET['id'] + `&sid=` + g_config.history[_GET['id']]['sid'] + `&pwd=` + g_config.history[_GET['id']]['pwd'], '_blank');
+    } 
+}
+
 function parseData(data) {
-		document.title = data['name'];
+    g_manga[data['id']] = data;
+    local_saveJson('manga', g_manga);
+
+    if(g_config.history[_GET['id']] == undefined){
+        $('#btn_last').html('最初からみる');
+    }
+    document.title = data['name'];
     $('#title').html(data['name']);
     $('img').attr('src', data['cover']);
     $('#list h2').html('List(' + data['list'].length + ')');
     $('#date').html('<b class="ml-5">' + new Date(data['date']).toUTCString() + '</b>');
     $('#author').html(data['author']);
     $('#desc').html(data['desc']);
-    for (var cap of data['list']) {
+    var cap;
+    for(var i=0;i<data['list'].length;i++){
+        cap = data['list'][i];
         $('#list').append(` <div>
-            <a target="_blank" href="index.html?id=` + data['id'] + `&sid=` + cap['sid'] + `&pwd=` + data['attr']['password'] + `">` + cap['name'] + `</a>
+            <a target="_blank" href="index.html?id=` + data['id'] + `&sid=` + cap['sid'] + `&pwd=` + data['attr']['password'] + '">' + cap['name'] + `</a>
             <br/>
             ` + cap['date'] + `
         </div>
