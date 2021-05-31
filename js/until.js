@@ -1,6 +1,6 @@
 var _GET = getGETArray();
 var api = 'https://mangareader.glitch.me/.';
-var api = '.';
+//var api = '.';
 
 var g_localKey = 'manga_';
 // 本地储存前缀
