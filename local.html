@@ -1,6 +1,5 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-touch-fullscreen" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -17,12 +16,16 @@
 <style type="text/css">
 #content {
     text-align: center;
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 
 #img {
     width: 100%;
     margin: 0 auto;
-    max-width: fit-content
+    max-width: 800px;
 }
 
 .progress {
@@ -48,8 +51,6 @@
 <script type="text/javascript" src="js/until.js"></script>
 <script type="text/javascript" src="js/halfmoon.min.js"></script>
 <script type="text/javascript" src="js/jquery.min.js"></script>
-<script src="js/jquery-ajax-blob-arraybuffer.js"></script>
-<script type="text/javascript" src="js/zip.min.js"></script>
 <script type="text/javascript">
 var g_index = 0;
 var g_imgs;
@@ -94,6 +95,7 @@ function loadImage(index){
     if(g_preload.indexOf(index) != -1) return;
     //console.log('preload ' + index);
     g_preload.push(index);
+    var url = g_imgs[index].img;
     return new Promise(function(resolve,reject){
         let img=new Image();
         img.onload=function(){
@@ -102,12 +104,18 @@ function loadImage(index){
         img.onerror=function(){
             reject(src+'load failed');
         }
-        img.src=g_imgs[index].img;
+        img.src=url;
     })
 }
     
 
 function setIndex(index, preload){
+    index = parseInt(index);
+    g_config.history[_GET['id']] = {
+        path: _GET['path'],
+        index: index
+    }
+    local_saveJson('config', g_config);
     g_index = index;
     setProgress(parseInt(index / g_max * 100));
     $('#img').attr('src', '').attr('src', g_imgs[index].img);
@@ -147,7 +155,7 @@ function loadJson(){
         g_imgs = imgs;
         g_max = Object.keys(imgs).length;
         $('#loading').fadeOut('slow');
-        setIndex(0, true);
+        setIndex(_GET['index'] || 0, true);
         $('#content').show('slow');
         halfmoon.initStickyAlert({
             content: 'load ' + imgs.length + ' images.',

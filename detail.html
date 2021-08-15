@@ -99,7 +99,13 @@ $(function() {
 function openLast() {
     initConfig();
     if (g_config.history[_GET['id']] != undefined) {
-        window.open(`./index.html?id=` + _GET['id'] + `&sid=` + g_config.history[_GET['id']]['sid'] + `&pwd=` + g_config.history[_GET['id']]['pwd'], '_blank');
+        var his = g_config.history[_GET['id']];
+        if(his['path'] != undefined){
+            href =  `./local.html?id=` + _GET['id'] + `&path=` + his['path'] + `&index=` + his['index'];
+        }else{
+            href = `./index.html?id=` + _GET['id'] + `&sid=` + his['sid'] + `&pwd=` + his['pwd'];
+        }
+        window.open(href, '_blank');
     }
 }
 
