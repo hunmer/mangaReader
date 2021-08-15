@@ -75,7 +75,8 @@ function nextImg() {
         }
         return;
     }
-    setIndex(g_index+1);
+    setIndex(g_index+1, true);
+    
 }
 
 function prevImg() {
@@ -88,10 +89,35 @@ function prevImg() {
     setIndex(g_index-1);
 }
 
-function setIndex(index){
+var g_preload = [];
+function loadImage(index){
+    if(g_preload.indexOf(index) != -1) return;
+    //console.log('preload ' + index);
+    g_preload.push(index);
+    return new Promise(function(resolve,reject){
+        let img=new Image();
+        img.onload=function(){
+            resolve(img);
+        }
+        img.onerror=function(){
+            reject(src+'load failed');
+        }
+        img.src=g_imgs[index].img;
+    })
+}
+    
+
+function setIndex(index, preload){
     g_index = index;
     setProgress(parseInt(index / g_max * 100));
-    $('#img').attr('src', g_imgs[index].img);
+    $('#img').attr('src', '').attr('src', g_imgs[index].img);
+    if(preload){
+        var max = g_max-g_index;
+        if(max > 3) max = 3;
+        for(var i = 1;i<max;i++){
+            loadImage(i+g_index);
+        }
+    }
 }
 
 function setProgress(value) {
@@ -121,7 +147,7 @@ function loadJson(){
         g_imgs = imgs;
         g_max = Object.keys(imgs).length;
         $('#loading').fadeOut('slow');
-        setIndex(0);
+        setIndex(0, true);
         $('#content').show('slow');
         halfmoon.initStickyAlert({
             content: 'load ' + imgs.length + ' images.',
