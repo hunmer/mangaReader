@@ -1,0 +1,133 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="full-screen" content="yes">
+<meta name="browsermode" content="application">
+<meta name="x5-fullscreen" content="true">
+<meta name="x5-page-mode" content="app">
+<link rel="shortcut icon" href="favicon.svg">
+<title></title>
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="css/halfmoon.min.css">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300&display=swap" rel="stylesheet">
+<style type="text/css">
+#content {
+    text-align: center;
+}
+
+#img {
+    width: 100%;
+    margin: 0 auto;
+    max-width: fit-content
+}
+
+.progress {
+    position: fixed;
+    top: 0px;
+    height: 5px;
+    width: 100%;
+}
+</style>
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<div class="sticky-alerts"></div>
+<div style="padding-top: 50%;
+    height: 100%;
+    width: 80%;
+    margin: 0 auto;" id="loading">
+    <h1 class="pt-10 text-center">Loading</h1>
+</div>
+<div id='content' style="display: none;">
+    <img id='img'>
+</div>
+<script type="text/javascript" src="js/until.js"></script>
+<script type="text/javascript" src="js/halfmoon.min.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script src="js/jquery-ajax-blob-arraybuffer.js"></script>
+<script type="text/javascript" src="js/zip.min.js"></script>
+<script type="text/javascript">
+var g_index = 0;
+var g_imgs;
+var g_max;
+$(function() {
+    if (_GET['id'] && _GET['path']) {
+       loadJson();
+    }
+    $(document).on('click', 'img', (e) => {
+        var x = e.offsetX / e.target.width;
+        if (x <= 0.5) {
+            prevImg();
+        } else {
+            nextImg();
+        }
+    });
+});
+
+function nextImg() {
+    if (g_index == g_imgs.length - 1) {
+        if(confirm('つづき読む？')){
+             location.href = 'local.html?id=' + _GET['id'] + '&path=' + (Number(_GET['path']) + 1);
+        }
+        return;
+    }
+    setIndex(g_index+1);
+}
+
+function prevImg() {
+    if (g_index == 0) {
+        if(_GET['path'] != 1 && confirm('前回読む？')){
+             location.href = 'local.html?id=' + _GET['id'] + '&path=' + (Number(_GET['path']) - 1);
+        }
+        return;
+    }
+    setIndex(g_index-1);
+}
+
+function setIndex(index){
+    g_index = index;
+    setProgress(parseInt(index / g_max * 100));
+    $('#img').attr('src', g_imgs[index].img);
+}
+
+function setProgress(value) {
+    $('.progress-bar').css('width', + value + '%');
+}
+
+function loadJson(){
+     halfmoon.initStickyAlert({
+            content: '',
+            title: 'loading...'
+        });
+
+    $.getJSON('./saves/' + _GET['id'] + '/' + _GET['path'] + '/pics.json', function(json, textStatus) {
+        if (textStatus !== 'success') return;
+        var imgs = [];
+        for (var i in json) {
+            imgs.push({
+                file: i,
+                img: './saves/' + _GET['id'] + '/' + _GET['path'] + '/' + i
+            });
+        }
+
+        imgs = imgs.sort(function(a, b) {
+            return parseInt(a.file) < parseInt(b.file) ? -1 : 1;
+        });
+        g_index = 0;
+        g_imgs = imgs;
+        g_max = Object.keys(imgs).length;
+        $('#loading').fadeOut('slow');
+        setIndex(0);
+        $('#content').show('slow');
+        halfmoon.initStickyAlert({
+            content: 'load ' + imgs.length + ' images.',
+            title: 'loaded success'
+        });
+    });
+}
+
+</script>
