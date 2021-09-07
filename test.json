@@ -1,6 +1,6 @@
 {
-    "name": "わたしに××しなさい",
-    "cover": "https://upload.wikimedia.org/wikipedia/zh/0/06/Watashi-ni-xx-Shinasai_-01-kodansha.jpg",
+    "name": "一週間フレンズ",
+    "cover": "https://images-fe.ssl-images-amazon.com/images/I/51A4eC1PU7L._SY291_BO1,204,203,200_QL40_ML2_.jpg",
     "list": [
     {
         "name": "1",
@@ -36,53 +36,8 @@
         "name": "7",
         "path": "7",
         "date": ""
-    },
-    {
-        "name": "8",
-        "path": "8",
-        "date": ""
-    },
-    {
-        "name": "9",
-        "path": "9",
-        "date": ""
-    },
-    {
-        "name": "10",
-        "path": "10",
-        "date": ""
-    },
-    {
-        "name": "11",
-        "path": "11",
-        "date": ""
-    },
-    {
-        "name": "12",
-        "path": "12",
-        "date": ""
-    },
-    {
-        "name": "13",
-        "path": "13",
-        "date": ""
-    },
-    {
-        "name": "14",
-        "path": "14",
-        "date": ""
-    },
-    {
-        "name": "15",
-        "path": "15",
-        "date": ""
-    },
-    {
-        "name": "16",
-        "path": "16",
-        "date": ""
     }],
     "date": 1629009981225,
-    "author": "遠山えま",
+    "author": "葉月抹茶",
     "desc": ""
 }
